@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: sentiment_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=sentiment_analysis_db
+    networks:
+      - sentiment_network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sentiment_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/ml_model:/app/ml_model
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+      - DATABASE_NAME=sentiment_analysis_db
+      - SENTIMENT_MODEL_PATH=/app/ml_model/sentiment_model.pkl
+    depends_on:
+      - mongodb
+    networks:
+      - sentiment_network
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sentiment_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - sentiment_network
+    stdin_open: true
+    tty: true
+
+networks:
+  sentiment_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

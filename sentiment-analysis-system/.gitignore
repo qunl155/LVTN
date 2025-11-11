@@ -1,0 +1,117 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+package-lock.json
+
+# React
+/frontend/build
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Docker
+*.log
+
+# Machine Learning Models - LOẠI TRỪ TẤT CẢ MODEL FILES
+*.pkl
+*.h5
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.bin
+backend/ml_model/**/*.pkl
+backend/ml_model/**/*.h5
+backend/ml_model/**/*.pt
+backend/ml_model/**/*.pth
+backend/ml_model/**/*.onnx
+backend/ml_model/**/*.safetensors
+backend/ml_model/**/*.bin
+backend/ml_model/phobert_tuned_model/
+backend/ml_model/*/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Cache
+.cache/
+*.pyc
+
+# Backup files
+*.bak
+*.swp
+*~
