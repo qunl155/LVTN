@@ -1,5 +1,11 @@
 from pydantic_settings import BaseSettings
 from typing import List
+import os
+from pathlib import Path
+
+# Get the backend directory (parent of src)
+BACKEND_DIR = Path(__file__).parent.parent.parent
+ENV_FILE = BACKEND_DIR / ".env"
 
 class Settings(BaseSettings):
     # MongoDB Configuration
@@ -21,7 +27,7 @@ class Settings(BaseSettings):
     YOUTUBE_API_KEY: str = ""
     
     # Analysis Configuration
-    MAX_COMMENTS_PER_REQUEST: int = 1000
+    MAX_COMMENTS_PER_REQUEST: int = 10000  # Increased to match max_comments limit
     VIOLENCE_KEYWORDS: List[str] = ["bạo lực", "đánh", "giết", "violence", "kill", "attack"]
     POLITICAL_KEYWORDS: List[str] = ["chính trị", "chính phủ", "đảng", "political", "government", "party"]
     
@@ -31,7 +37,7 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.ALLOW_ORIGINS.split(",")]
     
     class Config:
-        env_file = ".env"
+        env_file = str(ENV_FILE)
         case_sensitive = True
 
 settings = Settings()

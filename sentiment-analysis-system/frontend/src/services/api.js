@@ -6,7 +6,7 @@ const API_URL = `${API_BASE_URL}/api/v1`;
 // Create axios instance with default config
 const api = axios.create({
     baseURL: API_URL,
-    timeout: 30000,
+    timeout: 60000, // Increased to 60 seconds for regular requests
     headers: {
         'Content-Type': 'application/json',
     },
@@ -58,9 +58,16 @@ export const analyzeSentiment = async (comments, sourceUrl = null, sourcePlatfor
  */
 export const analyzeSentimentFromUrl = async (url, maxComments = 500) => {
     try {
+        // Calculate timeout based on number of comments
+        // Estimate: ~0.3s per comment + 30s buffer for API calls
+        const estimatedTime = (maxComments * 0.3) + 30;
+        const timeout = Math.max(60000, estimatedTime * 1000); // Minimum 60s, max based on comments
+        
         const response = await api.post('/analyze-url', {
             url,
             max_comments: maxComments,
+        }, {
+            timeout: timeout // Dynamic timeout based on comment count
         });
         return response.data;
     } catch (error) {

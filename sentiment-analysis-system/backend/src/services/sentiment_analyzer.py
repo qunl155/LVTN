@@ -4,8 +4,10 @@ from typing import List, Dict, Tuple
 import re
 import logging
 import torch
+import os
+from pathlib import Path
 from ..models.sentiment import SentimentLabel, ContentType, CommentAnalysis
-from ..config.settings import settings
+from ..config.settings import settings, BACKEND_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +17,9 @@ class SentimentAnalyzer:
     def __init__(self, model_path: str = None):
         """Initialize sentiment analyzer with ML model"""
         self.model_path = model_path or settings.SENTIMENT_MODEL_PATH
+        # Convert relative path to absolute path based on backend directory
+        if not os.path.isabs(self.model_path):
+            self.model_path = str(BACKEND_DIR / self.model_path)
         self.model = None
         self.vectorizer = None
         self.load_model()
@@ -22,8 +27,6 @@ class SentimentAnalyzer:
     def load_model(self):
         """Load the pre-trained sentiment model"""
         try:
-            import os
-            
             # Check if path exists
             if not os.path.exists(self.model_path):
                 raise FileNotFoundError(f"Model path not found at {self.model_path}")

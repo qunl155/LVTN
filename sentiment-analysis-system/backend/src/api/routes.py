@@ -203,7 +203,7 @@ async def analyze_from_url(
     Analyze sentiment from social media URL
     
     - **url**: URL to YouTube video, Facebook post, etc.
-    - **max_comments**: Maximum number of comments to analyze (1-1000)
+    - **max_comments**: Maximum number of comments to analyze (1-10000)
     """
     try:
         processor = DataProcessor()

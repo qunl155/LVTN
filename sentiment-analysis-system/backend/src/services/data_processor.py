@@ -122,7 +122,7 @@ class YouTubeDataFetcher:
                 if next_page_token:
                     params['pageToken'] = next_page_token
                 
-                response = requests.get(base_url, params=params, timeout=10)
+                response = requests.get(base_url, params=params, timeout=30)  # Increased to 30s for API calls
                 response.raise_for_status()
                 
                 data = response.json()

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Dashboard = ({ data }) => {
+    const [displayCount, setDisplayCount] = useState(20);
+
     if (!data) {
         return null;
     }
@@ -18,7 +20,7 @@ const Dashboard = ({ data }) => {
     if (!statistics || !statistics.total_comments) {
         return (
             <div className="dashboard-container">
-                <p>⚠️ Không có dữ liệu để hiển thị</p>
+                <p> Không có dữ liệu để hiển thị</p>
             </div>
         );
     }
@@ -51,7 +53,7 @@ const Dashboard = ({ data }) => {
 
     return (
         <div className="dashboard-container">
-            <h2>📊 Kết Quả Phân Tích</h2>
+            <h2> Kết Quả Phân Tích</h2>
 
             {/* Overall Sentiment */}
             <div className="overall-sentiment" style={{ backgroundColor: getSentimentColor(overall_sentiment) }}>
@@ -68,30 +70,30 @@ const Dashboard = ({ data }) => {
             {/* Statistics */}
             <div className="statistics-grid">
                 <div className="stat-card">
-                    <h4>📝 Tổng Bình Luận</h4>
+                    <h4> Tổng Bình Luận</h4>
                     <p className="stat-value">{statistics.total_comments}</p>
                 </div>
 
                 <div className="stat-card positive">
-                    <h4>😊 Tích Cực</h4>
+                    <h4> Tích Cực</h4>
                     <p className="stat-value">{statistics.positive_count}</p>
                     <p className="stat-percentage">{statistics.positive_percentage}%</p>
                 </div>
 
                 <div className="stat-card negative">
-                    <h4>😟 Tiêu Cực</h4>
+                    <h4> Tiêu Cực</h4>
                     <p className="stat-value">{statistics.negative_count}</p>
                     <p className="stat-percentage">{statistics.negative_percentage}%</p>
                 </div>
 
                 <div className="stat-card neutral">
-                    <h4>😐 Trung Tính</h4>
+                    <h4> Trung Tính</h4>
                     <p className="stat-value">{statistics.neutral_count}</p>
                     <p className="stat-percentage">{statistics.neutral_percentage}%</p>
                 </div>
 
                 <div className="stat-card">
-                    <h4>🎯 Độ Tin Cậy TB</h4>
+                    <h4> Độ Tin Cậy TB</h4>
                     <p className="stat-value">{(statistics.average_confidence * 100).toFixed(1)}%</p>
                 </div>
             </div>
@@ -104,8 +106,8 @@ const Dashboard = ({ data }) => {
                     <div className="warning-types">
                         {content_warning.warning_types.map((type, index) => (
                             <span key={index} className="warning-badge">
-                                {type === 'violence' ? '🚫 Bạo lực' : 
-                                 type === 'political' ? '⚖️ Chính trị' : type}
+                                {type === 'violence' ? ' Bạo lực' : 
+                                 type === 'political' ? ' Chính trị' : type}
                             </span>
                         ))}
                     </div>
@@ -114,15 +116,15 @@ const Dashboard = ({ data }) => {
 
             {/* Recommendation */}
             <div className="recommendation-box">
-                <h3>💡 Đề Xuất</h3>
+                <h3> Đề Xuất</h3>
                 <p className="recommendation-text">{recommendation}</p>
             </div>
 
             {/* Comments Analysis */}
             <div className="comments-analysis">
-                <h3>📋 Chi Tiết Bình Luận</h3>
+                <h3> Chi Tiết Bình Luận</h3>
                 <div className="comments-list">
-                    {comments_analysis && comments_analysis.length > 0 && comments_analysis.slice(0, 10).map((comment, index) => (
+                    {comments_analysis && comments_analysis.length > 0 && comments_analysis.slice(0, displayCount).map((comment, index) => (
                         <div key={index} className={`comment-item ${comment.sentiment || 'neutral'}`}>
                             <div className="comment-header">
                                 <span className="comment-emoji">{getSentimentEmoji(comment.sentiment)}</span>
@@ -145,9 +147,30 @@ const Dashboard = ({ data }) => {
                         </div>
                     ))}
                 </div>
-                {comments_analysis && comments_analysis.length > 10 && (
+                {comments_analysis && comments_analysis.length > displayCount && (
+                    <div className="load-more-container">
+                        <p className="comments-note">
+                            Hiển thị {displayCount}/{comments_analysis.length} bình luận
+                        </p>
+                        <button 
+                            className="load-more-btn"
+                            onClick={() => setDisplayCount(prev => Math.min(prev + 50, comments_analysis.length))}
+                        >
+                            Xem thêm 50 bình luận
+                        </button>
+                        {displayCount < comments_analysis.length - 50 && (
+                            <button 
+                                className="load-more-btn"
+                                onClick={() => setDisplayCount(comments_analysis.length)}
+                            >
+                                Xem tất cả ({comments_analysis.length - displayCount} còn lại)
+                            </button>
+                        )}
+                    </div>
+                )}
+                {comments_analysis && comments_analysis.length <= displayCount && comments_analysis.length > 0 && (
                     <p className="comments-note">
-                        Hiển thị 10/{comments_analysis.length} bình luận đầu tiên
+                        Hiển thị tất cả {comments_analysis.length} bình luận
                     </p>
                 )}
             </div>

@@ -7,15 +7,17 @@ import './styles/App.css';
 const App = () => {
     const [analysisData, setAnalysisData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState('Đang phân tích...');
 
     const handleAnalysisComplete = (data) => {
         setAnalysisData(data);
+        setLoadingMessage('Đang phân tích...');
     };
 
     return (
         <div className="App">
             <header className="app-header">
-                <h1>🔍 Hệ Thống Phân Tích Cảm Xúc Mạng Xã Hội</h1>
+                <h1> Hệ Thống Phân Tích Cảm Xúc Mạng Xã Hội</h1>
                 <p>Phân tích cảm xúc và nội dung từ bình luận người dùng</p>
             </header>
             
@@ -23,12 +25,16 @@ const App = () => {
                 <DataInput 
                     onAnalysisComplete={handleAnalysisComplete}
                     setLoading={setLoading}
+                    setLoadingMessage={setLoadingMessage}
                 />
                 
                 {loading && (
                     <div className="loading-container">
                         <div className="spinner"></div>
-                        <p>Đang phân tích...</p>
+                        <p>{loadingMessage}</p>
+                        <small style={{color: '#666', marginTop: '10px'}}>
+                            Việc phân tích nhiều bình luận có thể mất vài phút. Vui lòng đợi...
+                        </small>
                     </div>
                 )}
                 

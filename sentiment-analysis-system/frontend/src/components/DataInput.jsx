@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { analyzeSentiment, analyzeSentimentFromUrl } from '../services/api';
 
-const DataInput = ({ onAnalysisComplete, setLoading }) => {
+const DataInput = ({ onAnalysisComplete, setLoading, setLoadingMessage }) => {
     const [inputMode, setInputMode] = useState('text'); // 'text' or 'url'
     const [commentsText, setCommentsText] = useState('');
     const [url, setUrl] = useState('');
@@ -51,6 +51,11 @@ const DataInput = ({ onAnalysisComplete, setLoading }) => {
 
         try {
             setLoading(true);
+            
+            // Calculate estimated time
+            const estimatedMinutes = Math.ceil((maxComments * 0.3) / 60);
+            setLoadingMessage(`Đang tải và phân tích ${maxComments} bình luận... (Ước tính: ~${estimatedMinutes} phút)`);
+            
             const result = await analyzeSentimentFromUrl(url, maxComments);
             onAnalysisComplete(result);
         } catch (err) {
@@ -67,19 +72,19 @@ const DataInput = ({ onAnalysisComplete, setLoading }) => {
                     className={`mode-btn ${inputMode === 'text' ? 'active' : ''}`}
                     onClick={() => setInputMode('text')}
                 >
-                    📝 Nhập Bình Luận
+                     Nhập Bình Luận
                 </button>
                 <button
                     className={`mode-btn ${inputMode === 'url' ? 'active' : ''}`}
                     onClick={() => setInputMode('url')}
                 >
-                    🔗 Phân Tích Từ URL
+                     Phân Tích Từ URL
                 </button>
             </div>
 
             {error && (
                 <div className="error-message">
-                    ⚠️ {error}
+                     {error}
                 </div>
             )}
 
@@ -99,7 +104,7 @@ const DataInput = ({ onAnalysisComplete, setLoading }) => {
                         />
                     </div>
                     <button type="submit" className="submit-btn">
-                        🔍 Phân Tích Cảm Xúc
+                         Phân Tích Cảm Xúc
                     </button>
                 </form>
             ) : (
@@ -131,15 +136,15 @@ const DataInput = ({ onAnalysisComplete, setLoading }) => {
                             onChange={(e) => setMaxComments(Number(e.target.value))}
                             className="max-comments-select"
                         >
-                            <option value="100">100 bình luận</option>
-                            <option value="500">500 bình luận (Khuyến nghị)</option>
-                            <option value="1000">1000 bình luận</option>
-                            <option value="2000">2000 bình luận</option>
-                            <option value="5000">5000 bình luận</option>
-                            <option value="10000">10000 bình luận (Tối đa)</option>
+                            <option value="100">100 bình luận (~30 giây)</option>
+                            <option value="500">500 bình luận (~2-3 phút) - Khuyến nghị</option>
+                            <option value="1000">1000 bình luận (~5 phút)</option>
+                            <option value="2000">2000 bình luận (~10 phút)</option>
+                            <option value="5000">5000 bình luận (~25 phút)</option>
+                            <option value="10000">10000 bình luận (~50 phút) - Tối đa</option>
                         </select>
                         <small className="help-text">
-                            ⚠️ Càng nhiều bình luận sẽ càng mất nhiều thời gian xử lý
+                            ⚠️ Nhiều bình luận hơn = Thời gian xử lý lâu hơn. Đừng đóng tab khi đang xử lý!
                         </small>
                     </div>
                     
