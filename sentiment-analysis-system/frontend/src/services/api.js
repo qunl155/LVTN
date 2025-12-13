@@ -62,7 +62,7 @@ export const analyzeSentimentFromUrl = async (url, maxComments = 500) => {
         // Estimate: ~0.3s per comment + 30s buffer for API calls
         const estimatedTime = (maxComments * 0.3) + 30;
         const timeout = Math.max(60000, estimatedTime * 1000); // Minimum 60s, max based on comments
-        
+
         const response = await api.post('/analyze-url', {
             url,
             max_comments: maxComments,
@@ -89,6 +89,24 @@ export const getAnalysisHistory = async (limit = 10) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching history:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get analysis detail with comments
+ * @param {string} analysisId - Analysis ID
+ * @param {number} commentsLimit - Maximum comments to fetch
+ * @returns {Promise} Analysis detail with comments
+ */
+export const getAnalysisDetail = async (analysisId, commentsLimit = 500) => {
+    try {
+        const response = await api.get(`/history/${analysisId}`, {
+            params: { comments_limit: commentsLimit },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching analysis detail:', error);
         throw error;
     }
 };

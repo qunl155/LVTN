@@ -281,6 +281,31 @@ async def get_analysis_history(limit: int = 10, skip: int = 0):
         logger.error(f"Error fetching history: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch history")
 
+@router.get("/history/{analysis_id}")
+async def get_analysis_detail(analysis_id: str, comments_limit: int = 500):
+    """Get analysis detail with comments"""
+    try:
+        db = await get_database()
+        
+        # Get analysis info
+        analysis = await db.get_analysis_by_id(analysis_id)
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        
+        # Get comments for this analysis
+        comments = await db.get_comments_by_analysis(analysis_id, limit=comments_limit)
+        
+        return {
+            "analysis": analysis,
+            "comments": comments,
+            "comments_count": len(comments)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching analysis detail: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch analysis detail")
+
 @router.get("/health", response_model=HealthCheckResponse)
 async def health_check():
     """Health check endpoint"""

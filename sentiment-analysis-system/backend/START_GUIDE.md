@@ -59,7 +59,7 @@ cd backend
 
 ---
 
-## ❓ Tại sao phải dùng đường dẫn đầy đủ?
+##  Tại sao phải dùng đường dẫn đầy đủ?
 
 ### Vấn đề:
 Khi bạn chạy `python` hoặc `uvicorn` trong terminal, Windows tìm trong:
@@ -102,13 +102,13 @@ http://localhost:8000/
 
 ---
 
-## 🛑 Dừng Server
+##  Dừng Server
 
 Nhấn `Ctrl + C` trong terminal
 
 ---
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Lỗi: "uvicorn not found"
 **Nguyên nhân:** Chưa activate venv hoặc chưa cài uvicorn
@@ -163,7 +163,7 @@ services.msc  # Tìm MongoDB
 
 ---
 
-## 📝 Tips
+## Tips
 
 1. **Luôn dùng script** `start.ps1` hoặc `start.bat` cho đơn giản
 2. **Giữ terminal mở** - server cần terminal chạy liên tục
@@ -172,7 +172,7 @@ services.msc  # Tìm MongoDB
 
 ---
 
-## 🎯 Next Steps
+##  Next Steps
 
 Sau khi backend chạy:
 1. Test API tại http://localhost:8000/docs
