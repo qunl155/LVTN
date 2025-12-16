@@ -96,7 +96,7 @@ const DataInput = ({ onAnalysisComplete, setLoading, setLoadingMessage, systemHe
         try {
             setLoading(true);
             const estimatedMinutes = Math.ceil((maxComments * 0.1) / 60);
-            setLoadingMessage(`Đang tải và phân tích ${maxComments} bình luận... (Ước tính: ~${estimatedMinutes} phút)`);
+            setLoadingMessage(`Đang tải và phân tích ${maxComments} bình luận... `);
 
             const result = await analyzeSentimentFromUrl(url, maxComments);
             onAnalysisComplete(result);
@@ -276,12 +276,12 @@ Bình thường thôi, không có gì đặc sắc.
                                 onChange={(e) => setMaxComments(Number(e.target.value))}
                                 className="w-full p-4 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer"
                             >
-                                <option value="100">100 bình luận (~30 giây)</option>
-                                <option value="500">500 bình luận (~2-3 phút) - Khuyến nghị</option>
-                                <option value="1000">1000 bình luận (~5 phút)</option>
-                                <option value="2000">2000 bình luận (~10 phút)</option>
-                                <option value="5000">5000 bình luận (~25 phút)</option>
-                                <option value="10000">10000 bình luận (~50 phút) - Tối đa</option>
+                                <option value="100">100 bình luận </option>
+                                <option value="500">500 bình luận </option>
+                                <option value="1000">1000 bình luận </option>
+                                <option value="2000">2000 bình luận </option>
+                                <option value="5000">5000 bình luận </option>
+                                <option value="10000">10000 bình luận </option>
                             </select>
                             <p className="text-xs text-slate-500 flex items-center gap-1">
                                 <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
