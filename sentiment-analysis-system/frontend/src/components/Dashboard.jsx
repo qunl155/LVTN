@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const Dashboard = ({ data }) => {
     const [displayCount, setDisplayCount] = useState(20);
+    const [sentimentFilter, setSentimentFilter] = useState('all'); // 'all', 'positive', 'negative', 'neutral'
 
     if (!data) {
         return null;
@@ -25,10 +26,10 @@ const Dashboard = ({ data }) => {
 
     const getSentimentEmoji = (sentiment) => {
         switch (sentiment) {
-            case 'positive': return '😊';
-            case 'negative': return '😟';
-            case 'neutral': return '😐';
-            default: return '🤔';
+            case 'positive': return '';
+            case 'negative': return '';
+            case 'neutral': return '';
+            default: return '';
         }
     };
 
@@ -105,7 +106,7 @@ const Dashboard = ({ data }) => {
                     <div className="flex flex-wrap gap-2">
                         {content_warning.warning_types && content_warning.warning_types.map((type, index) => (
                             <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                {type === 'violence' ? '⚠️ Bạo lực' : type === 'political' ? '🏛️ Chính trị' : type}
+                                {type === 'violence' ? 'Bạo lực' : type === 'political' ? 'Chính trị' : type}
                             </span>
                         ))}
                     </div>
@@ -132,74 +133,146 @@ const Dashboard = ({ data }) => {
 
             {/* Comments Detail */}
             <div className="flex flex-col gap-4">
-                <h3 className="text-lg font-bold text-slate-800">Chi Tiết Bình Luận</h3>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <h3 className="text-lg font-bold text-slate-800">Chi Tiết Bình Luận</h3>
 
-                {comments_analysis && comments_analysis.slice(0, displayCount).map((comment, index) => {
-                    const commentConfig = getSentimentConfig(comment.sentiment);
-                    return (
-                        <div
-                            key={index}
-                            className={`bg-white border-l-4 ${comment.sentiment === 'positive' ? 'border-l-green-500' :
-                                    comment.sentiment === 'negative' ? 'border-l-red-500' : 'border-l-yellow-500'
-                                } rounded-xl p-4 shadow-sm border border-slate-100 flex flex-col gap-2`}
-                        >
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xl">{getSentimentEmoji(comment.sentiment)}</span>
-                                    <span className={`font-bold text-sm ${comment.sentiment === 'positive' ? 'text-green-600' :
-                                            comment.sentiment === 'negative' ? 'text-red-600' : 'text-yellow-600'
-                                        }`}>
-                                        {commentConfig.text}
-                                    </span>
-                                </div>
-                                <span className="px-2 py-1 bg-slate-100 rounded text-xs font-semibold text-slate-600">
-                                    {(comment.confidence * 100).toFixed(0)}%
-                                </span>
-                            </div>
-                            <p className="text-slate-600 text-sm leading-relaxed">{comment.text}</p>
-                            {comment.keywords_detected && comment.keywords_detected.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {comment.keywords_detected.map((keyword, i) => (
-                                        <span key={i} className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-medium">
-                                            {keyword}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-
-                {/* Load More */}
-                {comments_analysis && comments_analysis.length > displayCount && (
-                    <div className="flex flex-col items-center gap-3 mt-4">
-                        <p className="text-sm text-slate-500">
-                            Hiển thị {displayCount}/{comments_analysis.length} bình luận
-                        </p>
-                        <div className="flex gap-3">
+                    {/* Sentiment Filter */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium text-slate-600">Lọc theo:</span>
+                        <div className="flex flex-wrap gap-2">
                             <button
-                                onClick={() => setDisplayCount(prev => Math.min(prev + 50, comments_analysis.length))}
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                onClick={() => { setSentimentFilter('all'); setDisplayCount(20); }}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'all'
+                                        ? 'bg-indigo-600 text-white shadow-md'
+                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                    }`}
                             >
-                                Xem thêm 50 bình luận
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                </svg>
+                                Tất cả ({comments_analysis?.length || 0})
                             </button>
-                            {displayCount < comments_analysis.length - 50 && (
-                                <button
-                                    onClick={() => setDisplayCount(comments_analysis.length)}
-                                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors"
-                                >
-                                    Xem tất cả ({comments_analysis.length - displayCount} còn lại)
-                                </button>
-                            )}
+                            <button
+                                onClick={() => { setSentimentFilter('positive'); setDisplayCount(20); }}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'positive'
+                                        ? 'bg-green-600 text-white shadow-md'
+                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                    }`}
+                            >
+                                😊 Tích cực ({statistics.positive_count || 0})
+                            </button>
+                            <button
+                                onClick={() => { setSentimentFilter('negative'); setDisplayCount(20); }}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'negative'
+                                        ? 'bg-red-600 text-white shadow-md'
+                                        : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                    }`}
+                            >
+                                😟 Tiêu cực ({statistics.negative_count || 0})
+                            </button>
+                            <button
+                                onClick={() => { setSentimentFilter('neutral'); setDisplayCount(20); }}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'neutral'
+                                        ? 'bg-yellow-500 text-white shadow-md'
+                                        : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                    }`}
+                            >
+                                Trung tính ({statistics.neutral_count || 0})
+                            </button>
                         </div>
                     </div>
-                )}
+                </div>
 
-                {comments_analysis && comments_analysis.length <= displayCount && comments_analysis.length > 0 && (
-                    <p className="text-center text-sm text-slate-500 mt-2">
-                        Hiển thị tất cả {comments_analysis.length} bình luận
-                    </p>
-                )}
+                {(() => {
+                    const filteredComments = comments_analysis?.filter(
+                        comment => sentimentFilter === 'all' || comment.sentiment === sentimentFilter
+                    ) || [];
+
+                    if (filteredComments.length === 0) {
+                        return (
+                            <p className="text-center text-slate-500 py-8 bg-slate-50 rounded-xl">
+                                Không có bình luận {sentimentFilter === 'positive' ? 'tích cực' :
+                                    sentimentFilter === 'negative' ? 'tiêu cực' :
+                                        sentimentFilter === 'neutral' ? 'trung tính' : ''} nào
+                            </p>
+                        );
+                    }
+
+                    return (
+                        <>
+                            {filteredComments.slice(0, displayCount).map((comment, index) => {
+                                const commentConfig = getSentimentConfig(comment.sentiment);
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`bg-white border-l-4 ${comment.sentiment === 'positive' ? 'border-l-green-500' :
+                                            comment.sentiment === 'negative' ? 'border-l-red-500' : 'border-l-yellow-500'
+                                            } rounded-xl p-4 shadow-sm border border-slate-100 flex flex-col gap-2`}
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xl">{getSentimentEmoji(comment.sentiment)}</span>
+                                                <span className={`font-bold text-sm ${comment.sentiment === 'positive' ? 'text-green-600' :
+                                                    comment.sentiment === 'negative' ? 'text-red-600' : 'text-yellow-600'
+                                                    }`}>
+                                                    {commentConfig.text}
+                                                </span>
+                                            </div>
+                                            <span className="px-2 py-1 bg-slate-100 rounded text-xs font-semibold text-slate-600">
+                                                {(comment.confidence * 100).toFixed(0)}%
+                                            </span>
+                                        </div>
+                                        <p className="text-slate-600 text-sm leading-relaxed">{comment.text}</p>
+                                        {comment.keywords_detected && comment.keywords_detected.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {comment.keywords_detected.map((keyword, i) => (
+                                                    <span key={i} className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-medium">
+                                                        {keyword}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            {/* Load More */}
+                            {filteredComments.length > displayCount && (
+                                <div className="flex flex-col items-center gap-3 mt-4">
+                                    <p className="text-sm text-slate-500">
+                                        Hiển thị {displayCount}/{filteredComments.length} bình luận
+                                        {sentimentFilter !== 'all' && ` (${sentimentFilter === 'positive' ? 'tích cực' :
+                                            sentimentFilter === 'negative' ? 'tiêu cực' : 'trung tính'})`}
+                                    </p>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => setDisplayCount(prev => Math.min(prev + 50, filteredComments.length))}
+                                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                        >
+                                            Xem thêm 50 bình luận
+                                        </button>
+                                        {displayCount < filteredComments.length - 50 && (
+                                            <button
+                                                onClick={() => setDisplayCount(filteredComments.length)}
+                                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors"
+                                            >
+                                                Xem tất cả ({filteredComments.length - displayCount} còn lại)
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {filteredComments.length <= displayCount && filteredComments.length > 0 && (
+                                <p className="text-center text-sm text-slate-500 mt-2">
+                                    Hiển thị tất cả {filteredComments.length} bình luận
+                                    {sentimentFilter !== 'all' && ` (${sentimentFilter === 'positive' ? 'tích cực' :
+                                        sentimentFilter === 'negative' ? 'tiêu cực' : 'trung tính'})`}
+                                </p>
+                            )}
+                        </>
+                    );
+                })()}
             </div>
         </div>
     );

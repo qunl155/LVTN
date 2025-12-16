@@ -366,31 +366,31 @@ def generate_recommendation(
     
     # Based on overall sentiment
     if overall_sentiment == SentimentLabel.POSITIVE:
-        recommendations.append("✅ Nội dung này nhận được phản hồi tích cực từ cộng đồng.")
+        recommendations.append("Nội dung này nhận được phản hồi tích cực từ cộng đồng.")
     elif overall_sentiment == SentimentLabel.NEGATIVE:
-        recommendations.append("⚠️ Nội dung này nhận được nhiều phản hồi tiêu cực.")
+        recommendations.append("Nội dung này nhận được nhiều phản hồi tiêu cực.")
     else:
-        recommendations.append("ℹ️ Nội dung này nhận được phản hồi trung tính từ cộng đồng.")
+        recommendations.append("Nội dung này nhận được phản hồi trung tính từ cộng đồng.")
     
     # Based on negative percentage
     if statistics.negative_percentage > 50:
-        recommendations.append("🚫 Có hơn 50% bình luận tiêu cực. Nên cân nhắc trước khi xem.")
+        recommendations.append("Có hơn 50% bình luận tiêu cực. Nên cân nhắc trước khi xem.")
     elif statistics.negative_percentage > 30:
-        recommendations.append("⚠️ Có khá nhiều bình luận tiêu cực. Xem với sự thận trọng.")
+        recommendations.append("Có khá nhiều bình luận tiêu cực. Xem với sự thận trọng.")
     
     # Based on content warnings
     if content_warning.has_warning:
         if ContentType.VIOLENCE in content_warning.warning_types:
-            recommendations.append("⚠️ CẢNH BÁO: Phát hiện nội dung bạo lực trong bình luận.")
+            recommendations.append("CẢNH BÁO: Phát hiện nội dung bạo lực trong bình luận.")
         if ContentType.POLITICAL in content_warning.warning_types:
-            recommendations.append("⚠️ CẢNH BÁO: Phát hiện nội dung chính trị nhạy cảm.")
+            recommendations.append("CẢNH BÁO: Phát hiện nội dung chính trị nhạy cảm.")
     
     # Overall recommendation
     if content_warning.has_warning or statistics.negative_percentage > 50:
-        recommendations.append("\n🔍 Đề xuất: NÊN CÂN NHẮC khi xem nội dung này.")
+        recommendations.append("\nĐề xuất: NÊN CÂN NHẮC khi xem nội dung này.")
     elif statistics.positive_percentage > 70:
-        recommendations.append("\n✅ Đề xuất: NÊN XEM - Nội dung được đánh giá tốt.")
+        recommendations.append("\nĐề xuất: NÊN XEM - Nội dung được đánh giá tốt.")
     else:
-        recommendations.append("\n💭 Đề xuất: Có thể xem nhưng nên lưu ý các ý kiến trái chiều.")
+        recommendations.append("\nĐề xuất: Có thể xem nhưng nên lưu ý các ý kiến trái chiều.")
     
     return " ".join(recommendations)

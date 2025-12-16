@@ -1,97 +1,86 @@
 # SO DO TUAN TU - HE THONG PHAN TICH CAM XUC
 
-## 1. SO DO PHAN TICH TU VAN BAN
+## 1. SO DO TUAN TU TONG HOP (COMBINED)
 
-Copy code ben duoi vao https://mermaid.live/
-
-```
-sequenceDiagram
-    autonumber
-    participant User as User
-    participant FE as Frontend React
-    participant API as Backend FastAPI
-    participant DP as DataProcessor
-    participant SA as SentimentAnalyzer
-    participant DB as MongoDB
-
-    User->>FE: Enter comments
-    User->>FE: Click Analyze button
-    FE->>FE: Split comments by line
-    FE->>FE: Filter empty comments
-    FE->>API: POST /api/v1/analyze
-    Note over API: Validate input
-    API->>DP: process_comments
-    DP->>DP: Clean comments
-    DP-->>API: cleaned_comments
-    loop Each comment
-        API->>SA: analyze_comment
-        SA->>SA: preprocess_text
-        SA->>SA: detect_content_type
-        SA->>SA: predict_sentiment_ml
-        Note over SA: PhoBERT Model
-        SA-->>API: CommentAnalysis
-    end
-    API->>API: Calculate statistics
-    API->>API: Generate warnings
-    API->>DB: save_analysis
-    DB-->>API: analysis_id
-    API->>DB: save_comments
-    API-->>FE: SentimentAnalysisResponse
-    FE->>FE: Display Dashboard
-    FE-->>User: Show results
-```
-
----
-
-## 2. SO DO PHAN TICH TU URL YOUTUBE
+So do nay the hien tat ca cac luong xu ly chinh cua he thong:
 
 ```
 sequenceDiagram
     autonumber
     participant User as User
-    participant FE as Frontend React
-    participant API as Backend FastAPI
+    participant FE as Frontend
+    participant API as Backend API
     participant DP as DataProcessor
     participant YT as YouTubeDataFetcher
     participant YTApi as YouTube API
     participant SA as SentimentAnalyzer
     participant DB as MongoDB
 
-    User->>FE: Enter YouTube URL
-    User->>FE: Select max comments
-    User->>FE: Click Analyze URL
-    FE->>FE: Show loading
-    FE->>API: POST /api/v1/analyze-url
-    API->>DP: validate_url
-    DP-->>API: valid
-    API->>DP: detect_platform
-    DP-->>API: youtube
-    API->>DP: extract_video_id
-    DP-->>API: video_id
-    API->>YT: fetch_comments
-    loop Pagination
-        YT->>YTApi: GET commentThreads
-        YTApi-->>YT: comments + nextPageToken
-    end
-    YT-->>API: comment_data
+    Note over User,DB: === PHAN TICH TU VAN BAN ===
+    User->>FE: Nhap binh luan + Click Phan tich
+    FE->>API: POST /api/v1/analyze
     API->>DP: process_comments
     DP-->>API: cleaned_comments
     loop Each comment
         API->>SA: analyze_comment
-        SA->>SA: PhoBERT Inference
-        SA-->>API: CommentAnalysis
+        Note over SA: PhoBERT Inference
+        SA-->>API: sentiment + confidence
     end
-    API->>API: Calculate statistics
-    API->>DB: Save results
-    DB-->>API: Confirm
+    API->>DB: save_analysis + save_comments
+    DB-->>API: analysis_id
     API-->>FE: SentimentAnalysisResponse
-    FE->>FE: Hide loading
-    FE-->>User: Display results
+    FE-->>User: Display Dashboard + Chart
+
+    Note over User,DB: === PHAN TICH TU YOUTUBE URL ===
+    User->>FE: Nhap URL + Click Phan tich
+    FE->>API: POST /api/v1/analyze-url
+    API->>DP: validate_url + extract_video_id
+    DP-->>API: video_id
+    API->>YT: fetch_comments
+    loop Pagination
+        YT->>YTApi: GET commentThreads
+        YTApi-->>YT: comments
+    end
+    YT-->>API: comment_data
+    API->>DP: process_comments
+    loop Each comment
+        API->>SA: analyze_comment
+        SA-->>API: sentiment + confidence
+    end
+    API->>DB: save_analysis + save_comments
+    API-->>FE: SentimentAnalysisResponse
+    FE-->>User: Display Dashboard + Chart
+
+    Note over User,DB: === XEM LICH SU ===
+    User->>FE: Click tab Lich su
+    FE->>FE: Clear analysis results
+    FE->>API: GET /api/v1/history
+    API->>DB: get_analysis_history
+    DB-->>API: history list
+    API-->>FE: history data
+    FE-->>User: Display history list
+
+    Note over User,DB: === XEM CHI TIET LICH SU ===
+    User->>FE: Click item lich su
+    FE->>API: GET /api/v1/history/{id}
+    API->>DB: get_analysis_by_id
+    DB-->>API: analysis info
+    API->>DB: get_comments_by_analysis
+    DB-->>API: comments list
+    API-->>FE: analysis + comments
+    FE-->>User: Display comments detail
+
+    Note over User,DB: === HEALTH CHECK ===
+    FE->>API: GET /api/v1/health (every 30s)
+    API->>DB: check connection
+    API->>SA: check model_loaded
+    API-->>FE: status + db_connected + model_loaded
+    FE-->>User: Display status bar
 ```
 
 ---
 
-## 3. SO DO XU LY PHOBERT
+## 2. SO DO XU LY PHOBERT
 
 ```
 sequenceDiagram
@@ -150,75 +139,7 @@ sequenceDiagram
 
 ---
 
-## 4. SO DO LUU TRU DU LIEU
-
-```
-sequenceDiagram
-    autonumber
-    participant API as Backend API
-    participant DB as MongoDB
-    participant SA as sentiment_analyses
-    participant CM as comments
-    participant ST as statistics
-
-    Note over API,ST: SAVE ANALYSIS RESULT
-    API->>DB: get_database
-    DB-->>API: connection
-    API->>SA: save_analysis
-    Note over SA: Save summary data
-    SA-->>API: analysis_id
-    API->>CM: save_comments
-    Note over CM: Save comment details
-    CM-->>API: inserted_count
-    API->>ST: update_statistics
-    Note over ST: Update daily stats
-    ST-->>API: updated
-
-    Note over API,ST: QUERY HISTORY
-    API->>DB: get_analysis_history
-    DB->>SA: find sort limit
-    SA-->>DB: documents
-    DB-->>API: history
-    API->>DB: get_statistics
-    DB->>ST: aggregate
-    ST-->>DB: daily_stats
-    DB-->>API: statistics
-```
-
----
-
-## 5. SO DO HEALTH CHECK
-
-```
-sequenceDiagram
-    autonumber
-    participant Client as Client
-    participant API as Backend API
-    participant DB as MongoDB
-    participant SA as SentimentAnalyzer
-
-    Client->>API: GET /api/v1/health
-    API->>DB: get_database
-    alt DB connected
-        DB-->>API: OK
-        API->>API: db_connected true
-    else DB error
-        DB-->>API: failed
-        API->>API: db_connected false
-    end
-    API->>SA: get_analyzer
-    SA-->>API: analyzer
-    API->>API: check model_loaded
-    alt All OK
-        API-->>Client: healthy
-    else Partial
-        API-->>Client: degraded
-    end
-```
-
----
-
-## 6. SO DO KIEN TRUC TONG QUAN
+## 3. SO DO KIEN TRUC TONG QUAN
 
 ```
 flowchart TB
@@ -267,46 +188,30 @@ flowchart TB
 
 ---
 
-## 7. SO DO USECASE TONG QUAT
-
-Dua tren phan tich thuc te Frontend va Backend cua project:
-
-```
-flowchart TB
-    User((User))
-    
-    subgraph System[He Thong Phan Tich Cam Xuc]
-        UC1[Nhap binh luan thu cong]
-        UC2[Phan tich tu URL YouTube]
-        UC3[Xem ket qua phan tich]
-        UC4[Xem bieu do thong ke]
-    end
-    
-    User --> UC1
-    User --> UC2
-    UC1 -.->|include| UC3
-    UC2 -.->|include| UC3
-    UC3 -.->|include| UC4
-```
-
-**Phien ban tieng Anh:**
+## 4. SO DO USECASE TONG QUAT
 
 ```
 flowchart TB
     User((User))
     
     subgraph System[Sentiment Analysis System]
-        UC1[Enter Comments Manually]
+        UC1[Enter Comments]
         UC2[Analyze YouTube URL]
         UC3[View Results]
         UC4[View Chart]
+        UC5[View History]
+        UC6[View History Detail]
+        UC7[View System Status]
     end
     
     User --> UC1
     User --> UC2
+    User --> UC5
+    User --> UC7
     UC1 -.->|include| UC3
     UC2 -.->|include| UC3
     UC3 -.->|include| UC4
+    UC5 -.->|extend| UC6
 ```
 
 ### BANG MO TA USECASE
@@ -315,49 +220,11 @@ flowchart TB
 |-----|----------|-------|-------|
 | UC1 | Nhap binh luan thu cong | User nhap cac binh luan vao textarea, moi dong 1 binh luan | User |
 | UC2 | Phan tich tu URL YouTube | User dan link YouTube, he thong tu dong lay binh luan | User |
-| UC3 | Xem ket qua phan tich | Xem cam xuc tong the, thong ke, chi tiet tung binh luan, canh bao noi dung, de xuat | User |
+| UC3 | Xem ket qua phan tich | Xem cam xuc tong the, thong ke, chi tiet tung binh luan, canh bao, de xuat | User |
 | UC4 | Xem bieu do thong ke | Xem Pie Chart va Bar Chart phan bo Positive/Negative/Neutral | User |
-
-### DAC TA USECASE CHI TIET
-
-**UC1: Nhap binh luan thu cong**
-- Actor: User
-- Mo ta: User nhap truc tiep cac binh luan can phan tich
-- Tien dieu kien: User truy cap he thong
-- Luong chinh:
-  1. User chon tab Nhap binh luan
-  2. User nhap binh luan vao textarea (moi dong 1 binh luan)
-  3. User click nut Phan tich cam xuc ngay
-  4. He thong goi API /analyze
-  5. He thong hien thi ket qua (UC3)
-- Hau dieu kien: Ket qua phan tich duoc hien thi
-
-**UC2: Phan tich tu URL YouTube**
-- Actor: User
-- Mo ta: User dan link YouTube de he thong lay binh luan tu dong
-- Tien dieu kien: User co link YouTube hop le
-- Luong chinh:
-  1. User chon tab Phan tich tu URL
-  2. User dan URL YouTube
-  3. User chon so luong binh luan toi da (100-10000)
-  4. User click nut Phan tich tu URL
-  5. He thong goi YouTube API lay binh luan
-  6. He thong goi API /analyze-url
-  7. He thong hien thi ket qua (UC3)
-- Hau dieu kien: Ket qua phan tich duoc hien thi
-
-**UC3: Xem ket qua phan tich**
-- Actor: User
-- Mo ta: User xem ket qua sau khi phan tich
-- Tien dieu kien: Da thuc hien UC1 hoac UC2
-- Noi dung hien thi:
-  - Cam xuc tong the (Positive/Negative/Neutral)
-  - Thong ke: Tong binh luan, so luong va % tung loai cam xuc
-  - Do tin cay trung binh
-  - Canh bao noi dung (bao luc, chinh tri) - neu co
-  - De xuat cua he thong
-  - Chi tiet tung binh luan voi sentiment va confidence
-- Hau dieu kien: User da xem ket qua
+| UC5 | Xem lich su phan tich | Xem danh sach cac lan phan tich truoc do | User |
+| UC6 | Xem chi tiet lich su | Click vao item lich su de xem lai cac comments da phan tich | User |
+| UC7 | Xem trang thai he thong | Xem trang thai ket noi Database va Model AI | User |
 
 ---
 

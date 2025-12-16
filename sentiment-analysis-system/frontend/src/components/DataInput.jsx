@@ -11,6 +11,7 @@ const DataInput = ({ onAnalysisComplete, setLoading, setLoadingMessage, systemHe
     const [historyLoading, setHistoryLoading] = useState(false);
     const [selectedAnalysis, setSelectedAnalysis] = useState(null);
     const [detailLoading, setDetailLoading] = useState(false);
+    const [sentimentFilter, setSentimentFilter] = useState('all'); // 'all', 'positive', 'negative', 'neutral'
 
     // Handle tab change - clear analysis results and fetch history if needed
     useEffect(() => {
@@ -41,6 +42,7 @@ const DataInput = ({ onAnalysisComplete, setLoading, setLoadingMessage, systemHe
     const handleViewDetail = async (analysisId) => {
         try {
             setDetailLoading(true);
+            setSentimentFilter('all'); // Reset filter when viewing new analysis
             const data = await getAnalysisDetail(analysisId);
             setSelectedAnalysis(data);
         } catch (err) {
@@ -93,7 +95,7 @@ const DataInput = ({ onAnalysisComplete, setLoading, setLoadingMessage, systemHe
 
         try {
             setLoading(true);
-            const estimatedMinutes = Math.ceil((maxComments * 0.3) / 60);
+            const estimatedMinutes = Math.ceil((maxComments * 0.1) / 60);
             setLoadingMessage(`Đang tải và phân tích ${maxComments} bình luận... (Ước tính: ~${estimatedMinutes} phút)`);
 
             const result = await analyzeSentimentFromUrl(url, maxComments);
@@ -376,34 +378,90 @@ Bình thường thôi, không có gì đặc sắc.
                                         </div>
                                     </div>
 
+                                    {/* Sentiment Filter */}
+                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                        <span className="text-sm font-medium text-slate-600">Lọc theo:</span>
+                                        <div className="flex flex-wrap gap-2">
+                                            <button
+                                                onClick={() => setSentimentFilter('all')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'all'
+                                                    ? 'bg-indigo-600 text-white shadow-md'
+                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                                    }`}
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                                </svg>
+                                                Tất cả ({selectedAnalysis.comments?.length || 0})
+                                            </button>
+                                            <button
+                                                onClick={() => setSentimentFilter('positive')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'positive'
+                                                    ? 'bg-green-600 text-white shadow-md'
+                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                    }`}
+                                            >
+                                                😊 Tích cực ({selectedAnalysis.comments?.filter(c => c.sentiment === 'positive').length || 0})
+                                            </button>
+                                            <button
+                                                onClick={() => setSentimentFilter('negative')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'negative'
+                                                    ? 'bg-red-600 text-white shadow-md'
+                                                    : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                    }`}
+                                            >
+                                                😟 Tiêu cực ({selectedAnalysis.comments?.filter(c => c.sentiment === 'negative').length || 0})
+                                            </button>
+                                            <button
+                                                onClick={() => setSentimentFilter('neutral')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${sentimentFilter === 'neutral'
+                                                    ? 'bg-yellow-500 text-white shadow-md'
+                                                    : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                                    }`}
+                                            >
+                                                😐 Trung tính ({selectedAnalysis.comments?.filter(c => c.sentiment === 'neutral').length || 0})
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     {/* Comments List */}
                                     <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
                                         {selectedAnalysis.comments && selectedAnalysis.comments.length > 0 ? (
-                                            selectedAnalysis.comments.map((comment, index) => (
-                                                <div
-                                                    key={comment._id || index}
-                                                    className={`p-3 rounded-lg border-l-4 ${comment.sentiment === 'positive' ? 'bg-green-50 border-l-green-500' :
-                                                        comment.sentiment === 'negative' ? 'bg-red-50 border-l-red-500' :
-                                                            'bg-yellow-50 border-l-yellow-500'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-start gap-2">
-                                                        <span className="text-lg">{getSentimentEmoji(comment.sentiment)}</span>
-                                                        <div className="flex-1">
-                                                            <p className="text-sm text-slate-700">{comment.text}</p>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${getSentimentColor(comment.sentiment)}`}>
-                                                                    {comment.sentiment === 'positive' ? 'Tích cực' :
-                                                                        comment.sentiment === 'negative' ? 'Tiêu cực' : 'Trung tính'}
-                                                                </span>
-                                                                <span className="text-xs text-slate-400">
-                                                                    {(comment.confidence * 100).toFixed(0)}% tin cậy
-                                                                </span>
+                                            selectedAnalysis.comments
+                                                .filter(comment => sentimentFilter === 'all' || comment.sentiment === sentimentFilter)
+                                                .length > 0 ? (
+                                                selectedAnalysis.comments
+                                                    .filter(comment => sentimentFilter === 'all' || comment.sentiment === sentimentFilter)
+                                                    .map((comment, index) => (
+                                                        <div
+                                                            key={comment._id || index}
+                                                            className={`p-3 rounded-lg border-l-4 ${comment.sentiment === 'positive' ? 'bg-green-50 border-l-green-500' :
+                                                                comment.sentiment === 'negative' ? 'bg-red-50 border-l-red-500' :
+                                                                    'bg-yellow-50 border-l-yellow-500'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-start gap-2">
+                                                                <span className="text-lg">{getSentimentEmoji(comment.sentiment)}</span>
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm text-slate-700">{comment.text}</p>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${getSentimentColor(comment.sentiment)}`}>
+                                                                            {comment.sentiment === 'positive' ? 'Tích cực' :
+                                                                                comment.sentiment === 'negative' ? 'Tiêu cực' : 'Trung tính'}
+                                                                        </span>
+                                                                        <span className="text-xs text-slate-400">
+                                                                            {(comment.confidence * 100).toFixed(0)}% tin cậy
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            ))
+                                                    ))
+                                            ) : (
+                                                <p className="text-center text-slate-500 py-8">
+                                                    Không có bình luận {sentimentFilter === 'positive' ? 'tích cực' : sentimentFilter === 'negative' ? 'tiêu cực' : 'trung tính'} nào
+                                                </p>
+                                            )
                                         ) : (
                                             <p className="text-center text-slate-500 py-8">Không có dữ liệu comments</p>
                                         )}

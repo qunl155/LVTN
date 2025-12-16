@@ -170,9 +170,9 @@ const SentimentChart = ({ data }) => {
                     <div className="flex flex-col items-center text-center p-4 bg-white/5 rounded-lg">
                         <span className="text-4xl mb-2">
                             {statistics.positive_percentage >= statistics.negative_percentage &&
-                                statistics.positive_percentage >= statistics.neutral_percentage ? '😊' :
+                                statistics.positive_percentage >= statistics.neutral_percentage ? '' :
                                 statistics.negative_percentage >= statistics.positive_percentage &&
-                                    statistics.negative_percentage >= statistics.neutral_percentage ? '😟' : '😐'}
+                                    statistics.negative_percentage >= statistics.neutral_percentage ? '' : ''}
                         </span>
                         <span className="text-sm text-slate-400 mb-1">Cảm xúc chủ đạo</span>
                         <span className="text-xl font-bold">
@@ -183,12 +183,12 @@ const SentimentChart = ({ data }) => {
                         </span>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 bg-white/5 rounded-lg">
-                        <span className="text-4xl mb-2">📊</span>
+                        <span className="text-4xl mb-2"></span>
                         <span className="text-sm text-slate-400 mb-1">Tổng bình luận</span>
                         <span className="text-xl font-bold">{statistics.total_comments}</span>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 bg-white/5 rounded-lg">
-                        <span className="text-4xl mb-2">🎯</span>
+                        <span className="text-4xl mb-2"></span>
                         <span className="text-sm text-slate-400 mb-1">Độ tin cậy TB</span>
                         <span className="text-xl font-bold">{(statistics.average_confidence * 100).toFixed(1)}%</span>
                     </div>
